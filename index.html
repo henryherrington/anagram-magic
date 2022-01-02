@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Anagram Magic</title>
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+</head>
+  <body>
+    <div id="lobby">
+        <ul id="players-list"></ul>
+        <form id="username-form" action="">
+            <input id="username-input" autocomplete="off" placeholder="username"/><button>Set</button>
+        </form>
+        <button onclick="enqueuePlayer()">Play</button>
+    </div>
+    <div id="gameroom">
+        <p>Now playing ANAGRAM MAGIC</p>
+        <p>Room: <span id="room-name"></span></p>
+        <p>Player Word: <span id="player-word"></span></p>
+        <p>Opp Word: <span id="opp-word"></span></p>
+        <form id="word-form" action="">
+            <input id="word-input" autocomplete="off"/><button>Submit</button>
+        </form>
+        <button onclick="endGameSignal()">End Game</button>
+    </div>
+    <script>
+        var playersList = document.getElementById("players-list")
+        var lobby = document.getElementById("lobby")
+        var gameroom = document.getElementById("gameroom")
+        var roomName = document.getElementById("room-name")
+
+        function showRoom(room) {
+            lobby.style.display = "none"
+            gameroom.style.display = "block"
+            roomName.innerHTML = room
+        }
+
+        function showLobby() {
+            lobby.style.display = "block"
+            gameroom.style.display = "none"
+        }
+    </script>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io()
+
+        function enqueuePlayer() {
+            socket.emit("enqueue player")
+        }
+
+        function endGameSignal() {
+            socket.emit("end game signal")
+        }
+
+        // username form
+        var usernameForm = document.getElementById("username-form")
+        var usernameInput = document.getElementById("username-input")
+        usernameForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (usernameInput.value) {
+                socket.emit('username', usernameInput.value);
+                usernameInput.value = '';
+            }
+        })
+
+        //word form
+        var wordForm = document.getElementById("word-form")
+        var wordInput = document.getElementById("word-input")
+        wordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (wordInput.value) {
+                socket.emit('word', wordInput.value);
+                wordInput.value = '';
+            }
+        })
+
+        socket.on('lobby players', function(usernames) {
+            playersList.innerHTML = '';
+            for (const [socketId, username] of Object.entries(usernames)) {
+                var item = document.createElement('li');
+                item.textContent = username;
+                playersList.appendChild(item);
+            }
+        })
+
+        socket.on('in room', function(room) {
+            showRoom(room)
+        })
+
+        socket.on('update game', function(roomData) {
+            var playerWord = document.getElementById("player-word")
+            var oppWord = document.getElementById("opp-word")
+
+            for (let [id, data] of Object.entries(roomData)) {
+                if (id == socket.id) {
+                    playerWord.innerHTML = data.word
+                }
+                else {
+                    oppWord.innerHTML = data.word
+                }
+            }
+            console.log(roomData)
+        })
+
+        socket.on("end game", function() {
+            showLobby()
+            socket.emit("end game")
+        })
+
+    </script>
+  </body>
+</html>
