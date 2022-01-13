@@ -1,15 +1,17 @@
 const express = require('express');
 const app = express();
+const path = require('path')
+
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
-app.use(express.static(__dirname + '/public'))
+app.use(express.static(path.join(__dirname, 'build')))
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
-});
+app.get('/', function(req, res) {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'))
+})
 
 // contains data on usernames, room/game info
 var players = {}
@@ -21,6 +23,8 @@ var userGen = 0
 const GAME_TIMER_SECONDS = 15
 
 io.on('connection', (socket) => {
+    console.log(socket.id)
+
     function getOpp() {
         let room = players[socket.id]["room"]
         for (let i = 0; i < rooms[room]["players"].length; i++) {
@@ -146,6 +150,6 @@ io.on('connection', (socket) => {
     })
 })
 
-server.listen(3000, () => {
-    console.log('listening on *:3000')
+server.listen(4000, () => {
+    console.log('listening on *:4000')
 });
