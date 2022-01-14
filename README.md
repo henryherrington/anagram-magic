@@ -1,8 +1,8 @@
 # Anagram Magic
 A recreation of the old Miniclip game Anagram Magic.
 
-run backend with `start` in the backend folder
+run backend with `npm start` in the backend folder
+run frontend dev server with `npm start` in the frontend folder. Currently configured for development.
 
-front end 
-run frontend dev server with `npm start` in the frontend folder
-create frontend build folder with `npm run build`. Copy to backend folder. (avoids CORS resource sharing code)
+for production:
+create frontend build folder with `npm run build`. frontend and backend then run from single server. Change URLs accordingly and remove CORS permissions.
