@@ -1,0 +1,11 @@
+.lobby-tile {
+    display: inline-block;
+    margin: 2px;
+}
+
+.lobby-tile-avatar {
+    vertical-align: bottom;
+    
+    height: 40px;
+    border: 1px solid black;
+}

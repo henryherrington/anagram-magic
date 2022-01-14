@@ -1,0 +1,24 @@
+body {
+    background-color: rgb(169, 62, 62);
+    text-align: center;
+}
+.app-container {
+    height: calc(100vh - 125px);
+    max-width: 600px;
+    border: 1px solid rgb(152, 49, 49);
+
+    margin: auto;
+    padding: 125px 50px 0 50px;
+    
+    display: flex;
+    justify-content: center;
+
+    text-align: center;
+}
+
+#screen-picker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* display: none; */
+}
