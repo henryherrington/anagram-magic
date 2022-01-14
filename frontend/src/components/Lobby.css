@@ -1,3 +1,18 @@
 #lobby {
-    background-color: rgb(186, 235, 235);
+    text-align: center;
+}
+
+.player-box-container {
+    text-align: center;
+    display: inline-block
+}
+
+.lobby-pit {
+    display: inline-block;
+
+    margin-top: 40px;
+    padding: 5px;
+
+    text-align: left;
+    background-color: rgb(152, 49, 49);
 }
