@@ -1,22 +1,43 @@
-.letter-tile {
+.letter-tile, .empty-letter-tile {
     display: inline-block;
 
-    margin: 2px;
-    padding: 0 8px;
-
     border-radius: 2px;
-    background-color: white;
     font-family: monospace;
-    font-size: 30px;
     font-weight: bold;
-    box-shadow: 2px 2px 0 2px rgb(191, 191, 191);
-
 }
 
-.letters-container {
+.letter-tile {
+    background-color: white;
+    box-shadow: 2px 2px 0 2px rgb(191, 191, 191);
+}
+
+.empty-letter-tile {
+    background-color: rgba(0, 0, 0, 0.386);
+    box-shadow: 2px 2px 0 2px rgba(0, 0, 0, 0.386);
+}
+
+.letter-container {
     display: inline-block;
 }
 
 .spacer {
     width: 15px;
+}
+
+.spacing-small {
+    margin: 2px;
+}
+
+.spacing-large {
+    margin: 2px 4px;
+}
+
+.size-medium {
+    padding: 0 8px;
+    font-size: 30px;
+}
+
+.size-small {
+    padding: 0 6px;
+    font-size: 20px;
 }

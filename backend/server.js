@@ -15,7 +15,6 @@ app.get('/', function(req, res) {
     res.sendFile(path.join(__dirname, 'build', 'index.html'))
 })
 
-
 const server = http.createServer(app);
 
 // const io = socketIo(server);
@@ -35,16 +34,16 @@ var rooms = {}
 var inQueue = ""
 var roomGen = 0
 var userGen = 0
-const GAME_TIMER_SECONDS = 10
+const GAME_TIMER_SECONDS = 5
 
 io.on('connection', (socket) => {
-    console.log(socket.id)
+    console.log("connected: " + socket.id)
 
     function getOpp() {
         let roomId = players[socket.id]["roomId"]
         for (let i = 0; i < rooms[roomId]["players"].length; i++) {
             let player = rooms[roomId]["players"][i]
-            if (player != socket.id) {
+            if (player["id"] != socket.id) {
                 return player["id"]
             }
         }
@@ -94,22 +93,89 @@ io.on('connection', (socket) => {
         startRound()
     }
 
-    function startRound() {
+    function isInRecapRound() {
         let roomId = players[socket.id]["roomId"]
-        rooms[roomId]["roundLetters"] = genLetters(9) 
-        io.to(roomId).emit("update game", rooms[roomId])
+        let round = rooms[roomId]["round"]
+        return ((round * 2) % 2 != 0)
+    }
+    
+    function startRound() {
+        // if starting player disconnected (and therefore game has ended already), return
+        if (!(socket.id in players)) return
+
+        let roomId = players[socket.id]["roomId"]
+        let oldRound = rooms[roomId]["round"]
+        
+        // update round and letters (and score)
+        let round
+        if (oldRound == 0) round = 1
+        else round = oldRound + .5
+        rooms[roomId]["round"] = round
+       
+        if (round == 5.5) {
+            endGame("timeout")
+            return
+        }
+
+        let isRecap = isInRecapRound()
+
+        let playerRoomData, oppRoomData
+        if (!isRecap) {
+            rooms[roomId]["roundLetters"] = genLetters(9) 
+
+            playerRoomData = getCensoredRoomData(getOpp())
+            oppRoomData = getCensoredRoomData(socket.id)
+
+            console.log("starting round: " + round)
+        }
+        else {
+            playerRoomData = rooms[roomId]
+            oppRoomData = rooms[roomId]
+            console.log("starting recap round: " + round)
+        }
+
+        io.to(socket.id).emit("update game", playerRoomData)
+        io.to(getOpp()).emit("update game", oppRoomData)
+
+        
         setTimeout(() => {
-          endGame("timeout")
+          startRound("timeout")
         }, GAME_TIMER_SECONDS * 1000)
     }
 
     function genLetters(count) {
-      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-      let result = ""
-      for (let i = 0; i < count; i++) {
-        result += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-      }
-      return result
+        const CONSTONANTS = 'BCDFGHJKLMNPQRSTVWXYZ'
+        const VOWELS = 'AEIOU'
+        const ALPHABET = CONSTONANTS + VOWELS
+        let vowelCount = Math.floor(count / 3)
+        let constCount = Math.floor(count / 3)
+        let randCount = count - vowelCount - constCount
+
+        let result = ""
+        for (let i = 0; i < constCount; i++) {
+            result += CONSTONANTS.charAt(Math.floor(Math.random() * CONSTONANTS.length));
+        }
+        for (let i = 0; i < vowelCount; i++) {
+            result += VOWELS.charAt(Math.floor(Math.random() * VOWELS.length));
+        }
+        for (let i = 0; i < randCount; i++) {
+            result += ALPHABET.charAt(Math.floor(Math.random() * ALPHABET.length));
+        }
+        return result
+    }
+
+    function getCensoredRoomData(censoredPlayer) {
+        let roomId = players[censoredPlayer]["roomId"]
+        let roomData = rooms[roomId]
+        let clonedRoomData = JSON.parse(JSON.stringify(roomData))
+        
+        for (let i = 0; i < clonedRoomData["players"].length; i++) {
+            if (clonedRoomData["players"][i]["id"] == censoredPlayer) {
+                let wordLen = clonedRoomData["players"][i]["word"].length
+                clonedRoomData["players"][i]["word"] = new Array(wordLen + 1).join("*")
+            }
+        }
+        return clonedRoomData
     }
 
     function endGame(cause) {
@@ -118,17 +184,12 @@ io.on('connection', (socket) => {
 
         let winners = [players[getOpp()]["username"]]
 
-        console.log(cause)
         if (cause == "timeout") {
-            console.log("here")
             let roomPlayer = getRoomPlayer(socket.id)
             let roomOpp = getRoomPlayer(getOpp())
 
             playerWord = roomPlayer["word"]
             oppWord = roomOpp["word"]
-
-            console.log(playerWord)
-            console.log(oppWord)
 
             if (oppWord.length < playerWord.length) {
                 winners = [players[socket.id]["username"]]
@@ -143,7 +204,6 @@ io.on('connection', (socket) => {
         rooms[roomId]["winners"] = winners
 
         // store win
-        console.log(rooms[roomId])
         io.to(players[socket.id]["roomId"]).emit('end game', rooms[roomId])
     }
 
@@ -187,12 +247,16 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.on("word", (word) => {
+    socket.on('word', (word) => {
         let roomId = players[socket.id]["roomId"]
         if (roomId == null) return
+
+        if (isInRecapRound()) return
+
         let roomPlayer = getRoomPlayer(socket.id)
-        roomPlayer["word"] = word
-        io.to(players[socket.id]["roomId"]).emit("update game", rooms[roomId])
+        roomPlayer['word'] = word
+        io.to(socket.id).emit("update game", getCensoredRoomData(getOpp()))
+        io.to(getOpp()).emit("update game", getCensoredRoomData(socket.id))
     })
 
     socket.on('forfeit game', () => {
@@ -204,6 +268,8 @@ io.on('connection', (socket) => {
     })
 
     socket.on('disconnect', () => {
+        console.log("disconnected: " + socket.id)
+
         let roomId = players[socket.id]["roomId"]
         // if player in game, rely on other user to end game
         if (roomId in rooms) endGame("disconnect")
@@ -221,6 +287,14 @@ server.listen(4000, () => {
 
 
 /*
+
+=== players object ==
+{
+  'VilSGeYPiA3fg2-FAAAD': { username: 'Guest 1' },
+  'iA7s-iQDB9G18MGZAAAF': { username: 'Guest 2' }
+}
+=====================
+==== room object ====
 {
   "players": [
     {
@@ -241,5 +315,5 @@ server.listen(4000, () => {
   "cause": "forfeit",
   "winners": []
 }
-
+=====================
 */
