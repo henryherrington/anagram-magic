@@ -8,3 +8,11 @@
     /* background-color: blue; */
     width: 100%;
 }
+
+.player-box-container {
+    text-align: center;
+}
+
+.timer-container {
+    text-align: center;
+}

@@ -1,4 +1,5 @@
 .player-box {
+    display: inline-block;
     width: 125px;
 
     margin: 5px;
