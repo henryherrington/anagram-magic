@@ -6,7 +6,7 @@ function TileMessage(props) {
     let letterTileKeyGen = 0
 
     return (
-        <div>
+        <div className="tile-message">
             {props.message ? 
                 props.message.split('').map((letter) =>
                     <LetterTile
@@ -14,6 +14,7 @@ function TileMessage(props) {
                         key={letterTileKeyGen++}
                         spacing={props.spacing}
                         size={props.size}
+                        hidden={props.hidden}
                     ></LetterTile>
                 )
             : <></>

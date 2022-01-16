@@ -4,20 +4,34 @@ function LetterTile(props) {
     let classes
     let content
 
+    // set content
+
     if (props.letter ==  " ") {
-        classes = "spacer"
         content = ""
     }
+    else if (props.letter == "_" || props.hidden) {
+        content = " "
+    }
     else {
+        content = props.letter
+    }
+        
+
+    // set classes
+
+    if (props.letter ==  " ") {
+        classes = "spacer"
+    }
+    else {
+        // content classes
         if (props.letter == "_") {
             classes = "empty-letter-tile"
-            content = " "
         }
         else {
             classes = "letter-tile"
-            content = props.letter
         }
 
+        // spacing classes
         if (props.spacing == "large") {
             classes += " spacing-large"
         }
@@ -25,13 +39,19 @@ function LetterTile(props) {
             classes += " spacing-small"
         }
 
-        if (props.size == "small") {
+        // size classes
+        if (props.size == "extra-small" || props.hidden) {
+            classes += " size-extra-small"
+        }
+        else if (props.size == "small") {
             classes += " size-small"
         }
         else {
             classes += " size-medium"
         }
 
+        // other
+        if (props.hidden) classes += " hidden"
     }
         
     return (

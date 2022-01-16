@@ -84,18 +84,21 @@ io.on('connection', (socket) => {
         roomPlayer["id"] = socket.id
         roomPlayer["username"] = players[socket.id]["username"]
         roomPlayer["word"] = ""
+        roomPlayer["score"] = 0
         rooms[roomId]["players"].push(roomPlayer)
     }
 
     function startGame() {
-        let roomId = players[socket.id]["roomId"]
+        let roomId = players[socket.id]['roomId']
+        rooms[roomId]['players'][0]['score'] = 0
+        rooms[roomId]['players'][1]['score'] = 0
         io.to(roomId).emit('in room', roomId, rooms[roomId])
         startRound()
     }
 
     function isInRecapRound() {
-        let roomId = players[socket.id]["roomId"]
-        let round = rooms[roomId]["round"]
+        let roomId = players[socket.id]['roomId']
+        let round = rooms[roomId]['round']
         return ((round * 2) % 2 != 0)
     }
     
@@ -106,22 +109,20 @@ io.on('connection', (socket) => {
         let roomId = players[socket.id]["roomId"]
         let oldRound = rooms[roomId]["round"]
         
-        // update round and letters (and score)
+        // update round, letters, player words, (and score)
         let round
         if (oldRound == 0) round = 1
         else round = oldRound + .5
         rooms[roomId]["round"] = round
        
-        if (round == 5.5) {
-            endGame("timeout")
-            return
-        }
-
         let isRecap = isInRecapRound()
 
         let playerRoomData, oppRoomData
         if (!isRecap) {
-            rooms[roomId]["roundLetters"] = genLetters(9) 
+            
+            rooms[roomId]["roundLetters"] = genLetters(9)
+            rooms[roomId]["players"][0]["word"] = ""
+            rooms[roomId]["players"][1]["word"] = ""
 
             playerRoomData = getCensoredRoomData(getOpp())
             oppRoomData = getCensoredRoomData(socket.id)
@@ -129,9 +130,17 @@ io.on('connection', (socket) => {
             console.log("starting round: " + round)
         }
         else {
+
+            rooms[roomId]['players'][0]['score'] += rooms[roomId]['players'][0]['word'].length
+            rooms[roomId]['players'][1]['score'] += rooms[roomId]['players'][1]['word'].length
             playerRoomData = rooms[roomId]
             oppRoomData = rooms[roomId]
             console.log("starting recap round: " + round)
+        }
+
+        if (round == 5.5) {
+            endGame("timeout")
+            return
         }
 
         io.to(socket.id).emit("update game", playerRoomData)
@@ -188,13 +197,13 @@ io.on('connection', (socket) => {
             let roomPlayer = getRoomPlayer(socket.id)
             let roomOpp = getRoomPlayer(getOpp())
 
-            playerWord = roomPlayer["word"]
-            oppWord = roomOpp["word"]
+            playerScore = roomPlayer["score"]
+            oppScore = roomOpp["score"]
 
-            if (oppWord.length < playerWord.length) {
+            if (oppScore < playerScore) {
                 winners = [players[socket.id]["username"]]
             }
-            else if (oppWord.length == playerWord.length) {
+            else if (oppScore == playerScore) {
                 winners = [players[socket.id]["username"], players[getOpp()]["username"]]
             }
         }
