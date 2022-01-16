@@ -1,5 +1,4 @@
 import './TitleDisplay.css';
-import LetterTile from './LetterTile'
 import TileMessage from './TileMessage'
 
 function TitleDisplay(props) {

@@ -1,0 +1,23 @@
+.WIPB-container {
+    /* ideally rewrite later to be dependent on tile height */
+    height: 50px;
+}
+
+.word-in-progress-box {
+    display: inline-block;
+
+    padding: 5px;
+
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.386);
+}
+
+.arrow-up {
+    width: 0; 
+    height: 0; 
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    
+    border-bottom: 8px solid rgba(0, 0, 0, 0.386);
+    margin: auto;
+  }

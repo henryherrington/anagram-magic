@@ -7,41 +7,21 @@ import GuessArea from './GuessArea';
 import './Room.css';
 
 function Room(props) {
-    const [wordInput, setWordInput] = useState('')
-
-    function handleWordForm(e) {
-        if (wordInput != '') {
-            props.socket.emit('word', wordInput)
-            setWordInput('')
-        }
-        e.preventDefault()
-    }
 
     function forfeitGame() {
         props.socket.emit("forfeit game")
     }
 
-    let playerUsername = "You"
-    let oppUsername = "Opponent"
-    let playerWord = 0
-    let oppWord = 0
+    let opp, player
 
     if ("players" in props.roomData && props.roomData["players"].length > 1) {
-        let username0 = props.roomData["players"][0]["username"]
-        let word0 = props.roomData["players"][0]["word"]
-        let username1 = props.roomData["players"][1]["username"]
-        let word1 = props.roomData["players"][1]["word"]
         if (props.roomData["players"][0]["id"] == props.socket.id) {
-            playerUsername = username0
-            playerWord = word0
-            oppUsername = username1
-            oppWord = word1
+            player = props.roomData["players"][0]
+            opp = props.roomData["players"][1]
         }
         else {
-            playerUsername = username1
-            playerWord = word1
-            oppUsername = username0
-            oppWord = word0
+            opp = props.roomData["players"][0]
+            player = props.roomData["players"][1]
         }
     }
 
@@ -53,10 +33,12 @@ function Room(props) {
             <div className="players-container">
                 <div className="player-box-container">
                     <PlayerBox
-                        username={playerUsername}
+                        username={player["username"] || "You"}
                         avatar="blank"
-                        word={playerWord}
+                        word={player["word"] || ""}
                         revealWord={isRecapRound}
+                        score={player["score"]}
+                        showScore={true}
                     ></PlayerBox>
                 </div>
                 <div className="timer-container">
@@ -65,29 +47,25 @@ function Room(props) {
                 </div>
                 <div className="player-box-container">
                     <PlayerBox
-                        username={oppUsername}
+                        username={opp["username"] || "Opponent"}
                         avatar="blank"
-                        word={oppWord}
+                        word={opp["word"] || ""}
                         revealWord={isRecapRound}
+                        score={opp["score"]}
+                        showScore={true}
                     ></PlayerBox>
                 </div>
             </div>
             {!isRecapRound? 
             <div>
-                <form onSubmit={handleWordForm}>
-                    <input
-                        value={wordInput}
-                        onInput={e => (setWordInput(e.target.value))}
-                        autoComplete="off"
-                        placeholder="word"
-                    />
-                    <button>Submit</button>
-                </form>
-                <GuessArea letters={props.roomData.roundLetters}></GuessArea>
+                <GuessArea
+                    letters={props.roomData.roundLetters}
+                    socket={props.socket}
+                ></GuessArea>
             </div>
             : <></>
             }
-            <p>Room data: {JSON.stringify(props.roomData)}</p>
+            {/* <p>Room data: {JSON.stringify(props.roomData)}</p> */}
         </div>
     )
 }

@@ -26,6 +26,8 @@ function Lobby(props) {
                 <PlayerBox
                     avatar="blank"
                     username={props.playerUsername}
+                    showScore={false}
+                    revealWord={true}
                 ></PlayerBox>
             </div>
             {/* <form onSubmit={handleUsernameForm}>
