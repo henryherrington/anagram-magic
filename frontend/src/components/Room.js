@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Timer from './Timer'
 import PlayerBox from './PlayerBox';
-import LetterTile from './LetterTile';
 import GuessArea from './GuessArea';
 
 import './Room.css';
@@ -39,8 +38,10 @@ function Room(props) {
                     ></PlayerBox>
                 </div>
                 <div className="timer-container">
-                    {/* <Timer startTime={props.roomTimer}></Timer> */}
-                    <Timer startTime={30}></Timer>
+                    <Timer
+                        startTime={props.roomData.roundTimer}
+                        refresh={props.roomData.round}
+                    ></Timer>
                 </div>
                 <div className="player-box-container">
                     <PlayerBox
@@ -59,7 +60,6 @@ function Room(props) {
             </div>
             : <></>
             }
-            <p>Room data: {JSON.stringify(props.roomData)}</p>
         </div>
     )
 }
