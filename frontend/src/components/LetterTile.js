@@ -13,7 +13,7 @@ function LetterTile(props) {
         content = " "
     }
     else {
-        content = props.letter
+        content = props.letter.toUpperCase()
     }
         
 

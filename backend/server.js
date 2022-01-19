@@ -1,13 +1,10 @@
 const express = require("express");
 const http = require("http");
 const path = require('path')
-
 const socketIo = require("socket.io");
-
 const port = process.env.PORT || 4000;
-
 const app = express();
-
+const allWords = require('./allWords')
 
 app.use(express.static(path.join(__dirname, 'build')))
 
@@ -34,7 +31,8 @@ var rooms = {}
 var inQueue = ""
 var roomGen = 0
 var userGen = 0
-const GAME_TIMER_SECONDS = 5
+const ROUND_TIMER_SECONDS = 5
+const RECAP_TIMER_SECONDS = 3
 
 io.on('connection', (socket) => {
     console.log("connected: " + socket.id)
@@ -77,7 +75,7 @@ io.on('connection', (socket) => {
         rooms[roomId] = {
           "players": [],
           "round": 0,
-          "roundTimer": GAME_TIMER_SECONDS,
+          "roundTimer": 0,
           "roundLetters": "",
           "ended": false,
           "cause": "forfeit",
@@ -113,6 +111,7 @@ io.on('connection', (socket) => {
         
         // update round, letters, player words, (and score)
         let round
+        let roundTime
         if (oldRound == 0) round = 1
         else round = oldRound + .5
         rooms[roomId]["round"] = round
@@ -121,7 +120,8 @@ io.on('connection', (socket) => {
 
         let playerRoomData, oppRoomData
         if (!isRecap) {
-            
+            roundTime = ROUND_TIMER_SECONDS
+            rooms[roomId]["roundTimer"] = roundTime
             rooms[roomId]["roundLetters"] = genLetters(9)
             rooms[roomId]["players"][0]["word"] = ""
             rooms[roomId]["players"][1]["word"] = ""
@@ -132,9 +132,18 @@ io.on('connection', (socket) => {
             console.log("starting round: " + round)
         }
         else {
+            roundTime = RECAP_TIMER_SECONDS
+            rooms[roomId]["roundTimer"] = roundTime
 
-            rooms[roomId]['players'][0]['score'] += rooms[roomId]['players'][0]['word'].length
-            rooms[roomId]['players'][1]['score'] += rooms[roomId]['players'][1]['word'].length
+            // calculate score
+            for (let i = 0; i < rooms[roomId]['players'].length; i++) {
+                let word = rooms[roomId]['players'][i]['word']
+                if (allWords["isInWordList"](word)) {
+                    rooms[roomId]['players'][i]['score'] += word.length
+                }
+            }
+            
+            
             playerRoomData = rooms[roomId]
             oppRoomData = rooms[roomId]
             console.log("starting recap round: " + round)
@@ -151,26 +160,26 @@ io.on('connection', (socket) => {
         
         setTimeout(() => {
           startRound("timeout")
-        }, GAME_TIMER_SECONDS * 1000)
+        }, roundTime * 1000)
     }
 
     function genLetters(count) {
-        const CONSTONANTS = 'BCDFGHJKLMNPQRSTVWXYZ'
-        const VOWELS = 'AEIOU'
-        const ALPHABET = CONSTONANTS + VOWELS
+        let allConstonants = allWords.allConstonants
+        let allVowels = allWords.allVowels
+        let allLetters = allConstonants.concat(allVowels)
         let vowelCount = Math.floor(count / 3)
         let constCount = Math.floor(count / 3)
         let randCount = count - vowelCount - constCount
 
         let result = ""
         for (let i = 0; i < constCount; i++) {
-            result += CONSTONANTS.charAt(Math.floor(Math.random() * CONSTONANTS.length));
+            result += allConstonants[Math.floor(Math.random() * allConstonants.length)];
         }
         for (let i = 0; i < vowelCount; i++) {
-            result += VOWELS.charAt(Math.floor(Math.random() * VOWELS.length));
+            result += allVowels[Math.floor(Math.random() * allVowels.length)];
         }
         for (let i = 0; i < randCount; i++) {
-            result += ALPHABET.charAt(Math.floor(Math.random() * ALPHABET.length));
+            result += allLetters[Math.floor(Math.random() * allLetters.length)];
         }
         return result
     }
