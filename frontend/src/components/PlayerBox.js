@@ -1,28 +1,24 @@
-import { useState } from 'react';
 import './PlayerBox.css';
 import TileMessage from './TileMessage';
 import WordInProgressBox from './WordInProgressBox';
 
 function PlayerBox(props) {
-    const [time, setTime] = useState(100)
-
-    
 
     return (
         <div>
             <div className="player-box">
-                <div className="player-box-username">{props.username}</div>
-                <img className="player-box-img" src={"https://storage.googleapis.com/www.escapeworld.org/avatars/avatar-" + props.avatar + ".png"}></img>
+                <div className="player-box-username">{props.playerData["username"]}</div>
+                <img className="player-box-img" src={"./avatars/avatar-" + props.playerData["avatar"] + ".png"}></img>
                 {props.showScore ? 
                     <div className="score">
-                        <span>Score: {props.score}</span>
+                        <span>Score: {props.playerData["score"]}</span>
                     </div>
                 :   <></>
                 }
             </div>
             {props.revealWord
-            ? <TileMessage message={props.word} size="small"></TileMessage>
-            : <WordInProgressBox word={props.word}></WordInProgressBox>
+            ? <TileMessage message={props.playerData["word"]} size="small"></TileMessage>
+            : <WordInProgressBox word={props.playerData["word"]}></WordInProgressBox>
             }
         </div>
     )

@@ -4,7 +4,7 @@ import './LobbyTile.css';
 function LobbyTile(props) {
     return (
         <div className="lobby-tile">
-            <img className="lobby-tile-avatar" src={"https://storage.googleapis.com/www.escapeworld.org/avatars/avatar-blank.png"}></img>
+            <img className="lobby-tile-avatar" src={"./avatars/avatar-" + props.player["avatar"] + ".png"}></img>
         </div>
     )
 }
