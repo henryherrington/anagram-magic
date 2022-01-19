@@ -38,6 +38,7 @@ const GAME_TIMER_SECONDS = 5
 
 io.on('connection', (socket) => {
     console.log("connected: " + socket.id)
+    lobbySpawn("Guest " + userGen++, genAvatar())
 
     function getOpp() {
         let roomId = players[socket.id]["roomId"]
@@ -52,17 +53,23 @@ io.on('connection', (socket) => {
     function getRoomPlayer(targetPlayerId) {
         let roomId = players[socket.id]["roomId"]
         for (let i = 0; i < rooms[roomId]["players"].length; i++) {
-          let currPlayer = rooms[roomId]["players"][i]
-          if (currPlayer["id"] == targetPlayerId) {
-              return currPlayer
-          }
+            let currPlayer = rooms[roomId]["players"][i]
+            if (currPlayer["id"] == targetPlayerId) {
+                return currPlayer
+            }
       }
     }
 
-    function lobbySpawn(username) {
-        inLobby[socket.id] = username
-        players[socket.id] = {}
-        players[socket.id]["username"] = username
+    function lobbySpawn(username, avatar) {
+        players[socket.id] = {
+            "id"        : socket.id,
+            "username"  : username,
+            "avatar"    : avatar,
+            "roomId"    : "",
+            "word"      : "",
+            "score"     : 0
+        }
+        inLobby[socket.id] = players[socket.id]
         io.emit('lobby players', inLobby)
     }
 
@@ -80,12 +87,7 @@ io.on('connection', (socket) => {
 
     function addPlayerToRoom() {
         let roomId = players[socket.id]["roomId"]
-        let roomPlayer = {}
-        roomPlayer["id"] = socket.id
-        roomPlayer["username"] = players[socket.id]["username"]
-        roomPlayer["word"] = ""
-        roomPlayer["score"] = 0
-        rooms[roomId]["players"].push(roomPlayer)
+        rooms[roomId]["players"].push(players[socket.id])
     }
 
     function startGame() {
@@ -173,6 +175,11 @@ io.on('connection', (socket) => {
         return result
     }
 
+    function genAvatar() {
+        const AVATARS = ['bee', 'blank', 'flower', 'pawn', 'skull', 'worm']
+        return AVATARS[Math.floor(Math.random() * AVATARS.length)];
+    }
+
     function getCensoredRoomData(censoredPlayer) {
         let roomId = players[censoredPlayer]["roomId"]
         let roomData = rooms[roomId]
@@ -221,15 +228,15 @@ io.on('connection', (socket) => {
         let roomId = players[socket.id]["roomId"]
         socket.leave(roomId)
         if (roomId in rooms) delete rooms[roomId]
-        delete players[socket.id]["roomId"]
+        players[socket.id]["roomId"] = ""
+        players[socket.id]["word"] = ""
 
         // rejoin lobby
-        inLobby[socket.id] = players[socket.id]["username"]
+        inLobby[socket.id] = players[socket.id]
         io.emit('lobby players', inLobby)
     }
 
-    lobbySpawn("Guest " + userGen++)
-    socket.on('username', (username) => { lobbySpawn(username) })
+    socket.on('username', (username) => { lobbySpawn(username, "worm") })
 
     socket.on('enqueue player', () => {
         if (inQueue == "") {
@@ -299,24 +306,23 @@ server.listen(4000, () => {
 
 === players object ==
 {
-  'VilSGeYPiA3fg2-FAAAD': { username: 'Guest 1' },
-  'iA7s-iQDB9G18MGZAAAF': { username: 'Guest 2' }
+  'VilSGeYPiA3fg2-FAAAD': {
+        id: ___,
+        username: ___,
+        avatar: ___,
+        word: ___,
+        score: ___,
+    },
+  'iA7s-iQDB9G18MGZAAAF': {
+        id: ___,
+        username: ___,
+        avatar: ___
+    },
 }
 =====================
 ==== room object ====
 {
-  "players": [
-    {
-      "id": ---,
-      "username": ---,
-      "word": ---
-    },
-    {
-      "id": ---,
-      "username": ---,
-      "word": ---
-    }
-  ]
+  "players": *list of player objects*
   "round": 0,
   "roundLetters": BARKAS,
   "roundTime": 40,
@@ -324,5 +330,10 @@ server.listen(4000, () => {
   "cause": "forfeit",
   "winners": []
 }
+=====================
+===== in lobby (objects taken from players) ======
+
+*list of player objects*
+
 =====================
 */

@@ -3,6 +3,7 @@ import Lobby from './components/Lobby'
 import Room from './components/Room'
 import EndScreen from './components/EndScreen'
 import TitleDisplay from "./components/TitleDisplay";
+import Test from "./components/Test";
 
 import './App.css';
 
@@ -19,7 +20,7 @@ function App() {
   const [roomTimer, setRoomTimer] = useState();
   // should come from server eventually
   const [roomData, setRoomData] = useState({});
-  const [playerUsername, setPlayerUsername] = useState("");
+  const [playerData, setPlayerData] = useState({});
 
   const [mySocket, setMySocket] = useState();
 
@@ -37,17 +38,18 @@ function App() {
     setMySocket(socket)
 
     socket.on('lobby players', function(players) {
+      console.log(players)
+      
       setLobbyPlayers(players)
-
-      let playerUsername = "test"
+      let playerData = {}
 
       for (var key in players) {
         if (key == socket.id) {
-          playerUsername = players[key]
+          playerData = players[key]
         }
       }
 
-      setPlayerUsername(playerUsername)
+      setPlayerData(playerData)
     })
 
     socket.on('in room', function(room, roomData, timer) {
@@ -79,7 +81,7 @@ function App() {
       {lobbyShown ?
       <Lobby
         socket={mySocket}
-        playerUsername={playerUsername}
+        playerData={playerData}
         lobbyPlayers={lobbyPlayers}
       ></Lobby>
       : <></>}
@@ -93,7 +95,7 @@ function App() {
         showLobby={showLobby}  
       ></EndScreen>
       : <></>}
-
+    {/* <Test></Test> */}
     </div>
   );
 }

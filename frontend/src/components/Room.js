@@ -33,11 +33,8 @@ function Room(props) {
             <div className="players-container">
                 <div className="player-box-container">
                     <PlayerBox
-                        username={player["username"] || "You"}
-                        avatar="blank"
-                        word={player["word"] || ""}
+                        playerData = {player}
                         revealWord={isRecapRound}
-                        score={player["score"]}
                         showScore={true}
                     ></PlayerBox>
                 </div>
@@ -47,11 +44,8 @@ function Room(props) {
                 </div>
                 <div className="player-box-container">
                     <PlayerBox
-                        username={opp["username"] || "Opponent"}
-                        avatar="blank"
-                        word={opp["word"] || ""}
+                        playerData = {opp}
                         revealWord={isRecapRound}
-                        score={opp["score"]}
                         showScore={true}
                     ></PlayerBox>
                 </div>
@@ -65,7 +59,7 @@ function Room(props) {
             </div>
             : <></>
             }
-            {/* <p>Room data: {JSON.stringify(props.roomData)}</p> */}
+            <p>Room data: {JSON.stringify(props.roomData)}</p>
         </div>
     )
 }

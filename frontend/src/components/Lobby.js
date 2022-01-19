@@ -5,7 +5,7 @@ import IconButton from './IconButton';
 import LobbyTile from './LobbyTile';
 
 function Lobby(props) {
-    let players = Object.values(props.lobbyPlayers)
+    let lobbyPlayers = Object.values(props.lobbyPlayers)
     const [usernameInput, setUsernameInput] = useState('')
 
     function enqueuePlayer() {
@@ -24,8 +24,7 @@ function Lobby(props) {
         <div id="lobby"> 
             <div className="player-box-container">
                 <PlayerBox
-                    avatar="blank"
-                    username={props.playerUsername}
+                    playerData={props.playerData}
                     showScore={false}
                     revealWord={true}
                 ></PlayerBox>
@@ -45,8 +44,11 @@ function Lobby(props) {
                     size="lg"
             ></IconButton>
             <div className="lobby-pit">
-                {players.map((players) => (
-                    <LobbyTile key={players}></LobbyTile>
+                {lobbyPlayers.map((lobbyPlayer) => (
+                    <LobbyTile
+                        key={lobbyPlayer["id"]}
+                        player={lobbyPlayer}
+                    ></LobbyTile>
                 ))}
             </div>
         </div>
