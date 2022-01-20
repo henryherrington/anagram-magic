@@ -6,7 +6,7 @@ function LetterTile(props) {
 
     // set content
 
-    if (props.letter ==  " ") {
+    if (props.letter ==  " " || props.letter == ".") {
         content = ""
     }
     else if (props.letter == "_" || props.hidden) {
@@ -21,6 +21,9 @@ function LetterTile(props) {
 
     if (props.letter ==  " ") {
         classes = "spacer"
+    }
+    else if (props.letter ==  ".") {
+        classes = "gone"
     }
     else {
         // content classes

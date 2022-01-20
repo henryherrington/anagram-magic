@@ -4,75 +4,82 @@ import TileMessage from './TileMessage'
 
 const GUESS_LENGTH = 9
 
-function useKey(guess, setGuess) {
-    let guessString = guess.join("")
-    guessString = guessString.replace(/_/g, "")
-    // Bind and unbind events
+function useKey(oldGuess, setGuess, availableLetters, setAvailableLetters, originalLetters) {
+    oldGuess = oldGuess.replace(/_/g, "")
+    
     useEffect(() => {
-        // Does an event match the key we're watching?
         function validLetter(inputLetter) {
-            const validLetters = "abcdefghijklmnopqrstuvwxyz".split('')
-            for (let i = 0; i < validLetters.length; i++) {
-                if (inputLetter == validLetters[i].toLowerCase()) {
-                    return true
-                }
-            }
-            return false
+            if (availableLetters.indexOf(inputLetter.toLowerCase()) < 0) return false
+            return true
         }
 
-        function processStringGuess(stringGuess) {
-            if (stringGuess.length > GUESS_LENGTH) {
-                stringGuess = stringGuess.substring(0, GUESS_LENGTH)
+        function processGuessLength(newGuess) {
+            if (newGuess.length > GUESS_LENGTH) {
+                newGuess = newGuess.substring(0, GUESS_LENGTH)
             }
-            while (stringGuess.length < GUESS_LENGTH) {
-                stringGuess += "_"
+            while (newGuess.length < GUESS_LENGTH) {
+                newGuess += "_"
             }
-            return stringGuess.split('')
+            return newGuess
         }
-        // Event handlers
+        
         function onDown(event) {
-            if (validLetter(event.key.toLowerCase())) {
-                let newGuess = guessString + event.key.toUpperCase()
-                setGuess(processStringGuess(newGuess))
+            if (validLetter(event.key)) {
+                let newGuess = oldGuess + event.key
+                setGuess(processGuessLength(newGuess))
+                setAvailableLetters(availableLetters.replace(event.key, "."))
             }
             else if (event.keyCode == 8) {
-                if (guessString != "") {
-                    let newGuess = guessString.substring(0, guessString.length - 1)
-                    setGuess(processStringGuess(newGuess))
+                if (oldGuess != "") {
+                    let deletedLetter = oldGuess.slice(-1)
+                    for (let i = 0; i < availableLetters.length; i++) {
+                        if (availableLetters[i] == "." && originalLetters[i] == deletedLetter) {
+                            let newAvailable = availableLetters.slice(0, i) + deletedLetter + availableLetters.slice(i + 1)
+                            setAvailableLetters(newAvailable)
+                            break;
+                        }
+                    }
+                    let newGuess = oldGuess.substring(0, oldGuess.length - 1)
+                    setGuess(processGuessLength(newGuess))
                 }
             }
         }
+
         window.addEventListener("keydown", onDown)
         return () => {
             window.removeEventListener("keydown", onDown)
         }
-    }, [guess])
-
+    }, [oldGuess, originalLetters, availableLetters])
     return
 }
 
 function GuessArea(props) {
-    let guessInit = []
-    for (let i = 0; i < GUESS_LENGTH; i++) { guessInit.push('_') }
+    let guessInit = ''
+    for (let i = 0; i < GUESS_LENGTH; i++) { guessInit += '_' }
     const [guess, setGuess] = useState(guessInit)
+    const [originalLetters, setOriginalLetters] = useState(props.letters)
+    const [availableLetters, setAvailableLetters] = useState(props.letters)
+    
+    useEffect(() => {
+        setOriginalLetters(props.letters);
+        setAvailableLetters(props.letters)
+    }, [props.letters])
 
     useEffect(() => {
-        let guessString = guess.join('')
-        guessString = guessString.replace(/_/g, "")
-        if (guessString != '') {
-            props.socket.emit('word', guessString)
-        }
+        let guessString = guess.replace(/_/g, "")
+        props.socket.emit('word', guessString.toLowerCase())
     }, [guess])
+
     // set event listeners
-    useKey(guess, setGuess)
+    useKey(guess, setGuess, availableLetters, setAvailableLetters, originalLetters)
     
     return (
         <div className="guess-area">
             <div className="guess-tiles">
-                <TileMessage message={guess.join('')} spacing="large"></TileMessage>
+                <TileMessage message={guess} spacing="large"></TileMessage>
             </div>
             <div className="letter-bank">
-                <TileMessage message={props.letters} spacing="large"></TileMessage>
+                <TileMessage message={availableLetters} spacing="large"></TileMessage>
             </div>
         </div>
     )

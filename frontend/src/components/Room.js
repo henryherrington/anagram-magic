@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import Timer from './Timer'
 import PlayerBox from './PlayerBox';
 import GuessArea from './GuessArea';
+import IconButton from './IconButton';
 
 import './Room.css';
 
@@ -9,6 +9,11 @@ function Room(props) {
 
     function forfeitGame() {
         props.socket.emit("forfeit game")
+    }
+
+    function leaveToLobby() {
+        props.socket.emit('terminate room')
+        props.showLobby()
     }
 
     let opp, player
@@ -58,7 +63,7 @@ function Room(props) {
                     socket={props.socket}
                 ></GuessArea>
             </div>
-            : <></>
+            : <IconButton icon="exit" function={leaveToLobby} ></IconButton>
             }
         </div>
     )

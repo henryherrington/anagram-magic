@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Lobby from './components/Lobby'
 import Room from './components/Room'
-import EndScreen from './components/EndScreen'
 import TitleDisplay from "./components/TitleDisplay";
-import Test from "./components/Test";
 
 import './App.css';
 
@@ -17,8 +15,7 @@ const ENDPOINT = "http://localhost:4000";
 function App() {
   const [lobbyPlayers, setLobbyPlayers] = useState({});
   const [roomId, setRoomId] = useState();
-  const [roomTimer, setRoomTimer] = useState();
-  // should come from server eventually
+
   const [roomData, setRoomData] = useState({});
   const [playerData, setPlayerData] = useState({});
 
@@ -26,11 +23,9 @@ function App() {
 
   const [lobbyShown, setLobbyShown] = useState(true);
   const [roomShown, setRoomShown] = useState(false);
-  const [endScreenShown, setEndScreenShown] = useState(false);
 
-  function showLobby() { setLobbyShown(true); setRoomShown(false); setEndScreenShown(false)}
-  function showRoom() { setLobbyShown(false); setRoomShown(true); setEndScreenShown(false)}
-  function showEndScreen() { setLobbyShown(false); setRoomShown(false); setEndScreenShown(true)}
+  function showLobby() { setLobbyShown(true); setRoomShown(false);}
+  function showRoom() { setLobbyShown(false); setRoomShown(true);}
 
   useEffect(() => {
     // const socket = io(); // for prod
@@ -52,22 +47,15 @@ function App() {
       setPlayerData(playerData)
     })
 
-    socket.on('in room', function(room, roomData, timer) {
+    socket.on('in room', function(room, roomData) {
       setRoomId(room)
       setRoomData(roomData)
-      setRoomTimer(timer)
       showRoom()
     })
 
     socket.on('update game', function(roomData) {
       setRoomData(roomData)
     })
-
-    socket.on("end game", function(roomData) {
-      setRoomData(roomData)
-      showEndScreen()
-    })
-
   }, []);
 
   return (
@@ -75,7 +63,6 @@ function App() {
       <div id="screen-picker">
         <button onClick={showLobby}>L</button>
         <button onClick={showRoom}>R</button>
-        <button onClick={showEndScreen}>E</button>
       </div>
       <TitleDisplay></TitleDisplay>
       {lobbyShown ?
@@ -86,16 +73,13 @@ function App() {
       ></Lobby>
       : <></>}
       {roomShown ?
-      <Room socket={mySocket} roomId={roomId} roomData={roomData} roomTimer={roomTimer}></Room>
-      : <></>}
-      {endScreenShown ?
-      <EndScreen
+      <Room
         socket={mySocket}
+        roomId={roomId}
         roomData={roomData}
         showLobby={showLobby}  
-      ></EndScreen>
+      ></Room>
       : <></>}
-    {/* <Test></Test> */}
     </div>
   );
 }
