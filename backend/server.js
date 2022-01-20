@@ -38,6 +38,25 @@ io.on('connection', (socket) => {
     console.log("connected: " + socket.id)
     lobbySpawn("Guest " + userGen++, genAvatar())
 
+    function isAnagramOf(inputWord, letterBank) {
+        let word = inputWord.toLowerCase()
+        let lbCounts = {}
+        for (let i=0; i < letterBank.length; i++) {
+            if (letterBank[i] in lbCounts) {
+                lbCounts[letterBank[i]]++
+            }
+            else {
+                lbCounts[letterBank[i]] = 1
+            }
+        }
+        for (let i=0; i < word.length; i++) {
+            if (!(word[i] in lbCounts)) return false
+            if (lbCounts[word[i]] <= 0) return false
+            lbCounts[word[i]]--
+        }
+        return true
+    }
+
     function getOpp() {
         let roomId = players[socket.id]["roomId"]
         for (let i = 0; i < rooms[roomId]["players"].length; i++) {
@@ -46,16 +65,6 @@ io.on('connection', (socket) => {
                 return player["id"]
             }
         }
-    }
-
-    function getRoomPlayer(targetPlayerId) {
-        let roomId = players[socket.id]["roomId"]
-        for (let i = 0; i < rooms[roomId]["players"].length; i++) {
-            let currPlayer = rooms[roomId]["players"][i]
-            if (currPlayer["id"] == targetPlayerId) {
-                return currPlayer
-            }
-      }
     }
 
     function lobbySpawn(username, avatar) {
@@ -98,6 +107,7 @@ io.on('connection', (socket) => {
 
     function isInRecapRound() {
         let roomId = players[socket.id]['roomId']
+        if (!(roomId in rooms)) return false
         let round = rooms[roomId]['round']
         return ((round * 2) % 2 != 0)
     }
@@ -105,8 +115,9 @@ io.on('connection', (socket) => {
     function startRound() {
         // if starting player disconnected (and therefore game has ended already), return
         if (!(socket.id in players)) return
-
         let roomId = players[socket.id]["roomId"]
+        if (!(roomId in rooms)) return
+
         let oldRound = rooms[roomId]["round"]
         
         // update round, letters, player words, (and score)
@@ -149,18 +160,16 @@ io.on('connection', (socket) => {
             console.log("starting recap round: " + round)
         }
 
-        if (round == 5.5) {
-            endGame("timeout")
-            return
-        }
+        if (round == 5.5) endGame("timeout")
 
         io.to(socket.id).emit("update game", playerRoomData)
         io.to(getOpp()).emit("update game", oppRoomData)
 
-        
-        setTimeout(() => {
-          startRound("timeout")
-        }, roundTime * 1000)
+        if (!rooms[roomId]["ended"]) {
+            setTimeout(() => {
+                startRound("timeout")
+              }, roundTime * 1000)
+        }
     }
 
     function genLetters(count) {
@@ -210,11 +219,8 @@ io.on('connection', (socket) => {
         let winners = [players[getOpp()]["username"]]
 
         if (cause == "timeout") {
-            let roomPlayer = getRoomPlayer(socket.id)
-            let roomOpp = getRoomPlayer(getOpp())
-
-            playerScore = roomPlayer["score"]
-            oppScore = roomOpp["score"]
+            playerScore = players[socket.id]["score"]
+            oppScore = players[getOpp()]["score"]
 
             if (oppScore < playerScore) {
                 winners = [players[socket.id]["username"]]
@@ -229,7 +235,6 @@ io.on('connection', (socket) => {
         rooms[roomId]["winners"] = winners
 
         // store win
-        io.to(players[socket.id]["roomId"]).emit('end game', rooms[roomId])
     }
 
     function terminateRoom() {
@@ -273,15 +278,15 @@ io.on('connection', (socket) => {
     })
 
     socket.on('word', (word) => {
-        let roomId = players[socket.id]["roomId"]
+        let roomId = players[socket.id]['roomId']
         if (roomId == null) return
-
+        if (!(roomId in rooms)) return
         if (isInRecapRound()) return
+        if (!(isAnagramOf(word, rooms[roomId]['roundLetters']))) return
 
-        let roomPlayer = getRoomPlayer(socket.id)
-        roomPlayer['word'] = word
-        io.to(socket.id).emit("update game", getCensoredRoomData(getOpp()))
-        io.to(getOpp()).emit("update game", getCensoredRoomData(socket.id))
+        players[socket.id]['word'] = word
+        io.to(socket.id).emit('update game', getCensoredRoomData(getOpp()))
+        io.to(getOpp()).emit('update game', getCensoredRoomData(socket.id))
     })
 
     socket.on('forfeit game', () => {
