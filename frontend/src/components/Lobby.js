@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import PlayerBox from './PlayerBox';
 import './Lobby.css';
-import IconButton from './IconButton';
+import CircleIconButton from './CircleIconButton';
 import LobbyTile from './LobbyTile';
+import IconButtonRow from './IconButtonRow';
+import TitleDisplay from './TitleDisplay';
 
 function Lobby(props) {
     let lobbyPlayers = Object.values(props.lobbyPlayers)
@@ -22,6 +24,10 @@ function Lobby(props) {
 
     return (
         <div id="lobby"> 
+            <IconButtonRow
+                setScreenShown={props.setScreenShown}
+            ></IconButtonRow>
+            <TitleDisplay></TitleDisplay> 
             <div className="player-box-container">
                 <PlayerBox
                     playerData={props.playerData}
@@ -38,11 +44,11 @@ function Lobby(props) {
                 />
                 <button>Set</button>
             </form> */}
-            <IconButton
+            <CircleIconButton
                     function={enqueuePlayer}
                     icon="play"
                     size="lg"
-            ></IconButton>
+            ></CircleIconButton>
             <div className="lobby-pit">
                 {lobbyPlayers.map((lobbyPlayer) => (
                     <LobbyTile

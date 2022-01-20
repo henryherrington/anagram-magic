@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Lobby from './components/Lobby'
+import LobbyAlt from "./components/LobbyAlt";
 import Room from './components/Room'
 import TitleDisplay from "./components/TitleDisplay";
+import IconButtonRow from "./components/IconButtonRow";
 
 import './App.css';
 
@@ -21,11 +23,7 @@ function App() {
 
   const [mySocket, setMySocket] = useState();
 
-  const [lobbyShown, setLobbyShown] = useState(true);
-  const [roomShown, setRoomShown] = useState(false);
-
-  function showLobby() { setLobbyShown(true); setRoomShown(false);}
-  function showRoom() { setLobbyShown(false); setRoomShown(true);}
+  const [screenShown, setScreenShown] = useState("lobby");
 
   useEffect(() => {
     // const socket = io(); // for prod
@@ -33,7 +31,6 @@ function App() {
     setMySocket(socket)
 
     socket.on('lobby players', function(players) {
-      console.log(players)
       
       setLobbyPlayers(players)
       let playerData = {}
@@ -50,36 +47,46 @@ function App() {
     socket.on('in room', function(room, roomData) {
       setRoomId(room)
       setRoomData(roomData)
-      showRoom()
+      setScreenShown("room")
     })
 
     socket.on('update game', function(roomData) {
       setRoomData(roomData)
+      console.log(roomData)
     })
   }, []);
 
   return (
     <div className="app-container">
-      <div id="screen-picker">
+      {/* <div id="screen-picker">
         <button onClick={showLobby}>L</button>
         <button onClick={showRoom}>R</button>
+      </div> */}
+      <div className="centered-content">
+        {(screenShown == "lobby") ?
+        <Lobby
+          socket={mySocket}
+          playerData={playerData}
+          lobbyPlayers={lobbyPlayers}
+          setScreenShown={setScreenShown}
+        ></Lobby>
+        // <LobbyAlt></LobbyAlt>
+        : <></>}
+        {(screenShown == "room") ?
+        <Room
+          socket={mySocket}
+          roomId={roomId}
+          roomData={roomData}
+          setScreenShown={setScreenShown}  
+        ></Room>
+        : <></>}
+        {(screenShown == "about" || screenShown == "profile") ?
+        <LobbyAlt
+          contents={screenShown}
+          setScreenShown={setScreenShown}
+        ></LobbyAlt>
+        : <></>}
       </div>
-      <TitleDisplay></TitleDisplay>
-      {lobbyShown ?
-      <Lobby
-        socket={mySocket}
-        playerData={playerData}
-        lobbyPlayers={lobbyPlayers}
-      ></Lobby>
-      : <></>}
-      {roomShown ?
-      <Room
-        socket={mySocket}
-        roomId={roomId}
-        roomData={roomData}
-        showLobby={showLobby}  
-      ></Room>
-      : <></>}
     </div>
   );
 }

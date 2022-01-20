@@ -1,15 +1,20 @@
 body {
-    background-color: rgb(169, 62, 62);
+    background-color: rgb(152, 49, 49);
     text-align: center;
 }
 .app-container {
-    height: calc(100vh - 125px);
+    position: relative;
+    
+    height: calc(100vh - 64px);
     max-width: 600px;
-    border: 1px solid rgb(152, 49, 49);
+    min-width: 300px;
+    background-color: rgb(169, 62, 62);
 
     margin: auto;
-    padding: 125px 50px 0 50px;
-    
+    padding: 64px 50px 0 50px;
+}
+
+.centered-content {
     display: flex;
     justify-content: center;
 
