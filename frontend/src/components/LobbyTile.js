@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import './LobbyTile.css';
 
 function LobbyTile(props) {

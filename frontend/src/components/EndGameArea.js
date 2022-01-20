@@ -1,4 +1,4 @@
-import IconButton from './IconButton';
+import CircleIconButton from './CircleIconButton';
 import './EndGameArea.css';
 
 function EndGameArea(props) {
@@ -12,12 +12,12 @@ function EndGameArea(props) {
     return (
         <div>
             <p>Game over!</p>
-            {props.roomData["winners"][0].length > 1 ?
+            {props.roomData["winners"].length > 1 ?
                 "Tie Game!"
             :
                 <p>Winner is {props.roomData["winners"][0]}</p>
             }
-            <IconButton icon="exit" function={leaveToLobby} ></IconButton>
+            <CircleIconButton icon="exit" function={leaveToLobby}></CircleIconButton>
         </div>
     )
 }

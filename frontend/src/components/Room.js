@@ -64,7 +64,7 @@ function Room(props) {
                 ? <EndGameArea
                     socket={props.socket}
                     roomData={props.roomData}
-                    showLobby={props.showLobby}
+                    showLobby={() => props.setScreenShown("lobby")}
                 ></EndGameArea>
                 : <></>
               )

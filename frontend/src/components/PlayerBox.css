@@ -11,6 +11,9 @@
     /* border: 2px solid black; */
     box-shadow: 2px 2px 0 2px rgb(191, 191, 191);
 }
+.player-box-container {
+    margin-bottom: 12px;
+}
 
 .player-box-username {
     margin: 0;

@@ -1,10 +1,9 @@
-import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlay } from '@fortawesome/free-solid-svg-icons'
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
-import './IconButton.css';
+import './CircleIconButton.css';
 
-function IconButton(props) {
+function CircleIconButton(props) {
 
     var displayIcon
 
@@ -28,4 +27,4 @@ function IconButton(props) {
     )
 }
 
-export default IconButton
+export default CircleIconButton

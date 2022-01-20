@@ -1,0 +1,10 @@
+.lobby-icon {
+    display: inline-block;
+    margin: 0 8px;
+    color: rgb(103, 30, 30);
+    font-size: 18px;
+}
+
+.lobby-icon:hover {
+    color: white;
+}
