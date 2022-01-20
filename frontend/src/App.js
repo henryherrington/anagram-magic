@@ -4,6 +4,7 @@ import LobbyAlt from "./components/LobbyAlt";
 import Room from './components/Room'
 import TitleDisplay from "./components/TitleDisplay";
 import IconButtonRow from "./components/IconButtonRow";
+import Timer from "./components/Timer";
 
 import './App.css';
 
@@ -57,12 +58,14 @@ function App() {
   }, []);
 
   return (
+   
     <div className="app-container">
+       <Timer startTime={10}></Timer>
       {/* <div id="screen-picker">
-        <button onClick={showLobby}>L</button>
-        <button onClick={showRoom}>R</button>
+        <button onClick={() => setScreenShown("lobby")}>L</button>
+        <button onClick={() => setScreenShown("room")}>R</button>
       </div> */}
-      <div className="centered-content">
+      {/* <div className="centered-content">
         {(screenShown == "lobby") ?
         <Lobby
           socket={mySocket}
@@ -86,7 +89,7 @@ function App() {
           setScreenShown={setScreenShown}
         ></LobbyAlt>
         : <></>}
-      </div>
+      </div> */}
     </div>
   );
 }

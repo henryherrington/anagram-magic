@@ -1,7 +1,7 @@
 /* center out letter tile tile box shadow */
 .tile-message {
-    padding-right: 4px;
-    padding-bottom: 4px;
+    padding-right: 2px;
+    padding-bottom: 2px;
 }
 
 .tile-word {
