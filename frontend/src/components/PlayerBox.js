@@ -17,7 +17,9 @@ function PlayerBox(props) {
                 }
             </div>
             {props.revealWord
-            ? <TileMessage message={props.playerData["word"]} size="small"></TileMessage>
+            ? <div className="recapped-word">
+                <TileMessage message={props.playerData["word"]} size="small"></TileMessage>
+              </div>
             : <WordInProgressBox word={props.playerData["word"]}></WordInProgressBox>
             }
         </div>

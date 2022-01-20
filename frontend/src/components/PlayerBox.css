@@ -2,7 +2,8 @@
     display: inline-block;
     width: 125px;
 
-    margin: 5px;
+    /* 9 for right margin b/c of box shadow */
+    margin: 5px 9px 5px 5px;
     padding: 10px;
     border-radius: 10px;
 
@@ -36,4 +37,8 @@
     text-align: left;
     font-weight: bold;
     padding-top: 5px;
+}
+
+.recapped-word {
+    margin-top: 12px;
 }
